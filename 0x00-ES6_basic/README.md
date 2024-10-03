@@ -1,0 +1,1 @@
+This project is a lone project aimed at gaining practical knowledge of Javascript Ecma Script 6 (2015). The project is enclosed with a number of tasks to test the understanding and application of the knowledge acquired. 
