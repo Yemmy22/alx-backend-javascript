@@ -1,42 +1,36 @@
+/* eslint-disable no-unused-vars */
 const fs = require('fs');
 
-function countStudents(path) {
+function countStudents(fileName) {
   try {
-    // Read the file synchronously
-    const data = fs.readFileSync(path, 'utf8');
+    // Read and process file content
+    const content = fs.readFileSync(fileName, 'utf-8');
+    const lines = content.trim().split('\n');
 
-    // Split file content into lines and filter out empty lines
-    const lines = data.split('\n').filter((line) => line.trim() !== '');
+    // Handle empty file case
+    if (lines.length <= 1) throw new Error('Cannot load the database');
 
-    if (lines.length <= 1) {
-      throw new Error('No valid data found in the file');
-    }
+    // Extract headers and data rows
+    const header = lines[0].split(',');
+    const students = lines.slice(1).map((line) => line.split(','));
 
-    // Log total number of students
-    const totalStudents = lines.length - 1; // Exclude header row
-    process.stdout.write(`Number of students: ${totalStudents}\n`);
-
-    // Process data into fields and names
-    const fieldMap = {};
-    for (let i = 1; i < lines.length; i += 1) {
-      const [firstname, , , field] = lines[i].split(',');
-      if (!fieldMap[field]) {
-        fieldMap[field] = [];
+    // Aggregate student data by field
+    const fieldStats = {};
+    students.forEach((student) => {
+      const [firstname, , , field] = student;
+      if (!fieldStats[field]) {
+        fieldStats[field] = [];
       }
-      fieldMap[field].push(firstname);
-    }
+      fieldStats[field].push(firstname);
+    });
 
-    // Output field-specific counts and names
-    for (const [field, names] of Object.entries(fieldMap)) {
-      process.stdout.write(
-        `Number of students in ${field}: ${names.length}. List: ${names.join(', ')}\n`,
-      );
-    }
-  } catch (error) {
-    // Use process.stderr for error messages
-    process.stderr.write('Cannot load the database\n');
-    // Explicitly exit the process with a failure code
-    process.exit(1);
+    // Log total students and details by field
+    console.log(`Number of students: ${students.length}`);
+    Object.entries(fieldStats).forEach(([field, names]) => {
+      console.log(`Number of students in ${field}: ${names.length}. List: ${names.join(', ')}`);
+    });
+  } catch (err) {
+    throw new Error('Cannot load the database');
   }
 }
 
