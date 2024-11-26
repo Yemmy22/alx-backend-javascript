@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const http = require('http');
 const fs = require('fs');
 
@@ -64,32 +63,27 @@ const app = http.createServer((req, res) => {
       res.end();
     } else if (url === '/students') {
       const fileName = process.argv[2]; // Get the filename from the command-line arguments
-
-      if (!fileName) {
-        res.writeHead(400, { 'Content-Type': 'text/plain' });
-        res.end('Error: Database file not provided\n');
-      } else {
-        res.write('This is the list of our students\n');
-        countStudents(fileName)
-          .then((output) => {
-            res.end(output);
-          })
-          .catch((error) => {
-            res.statusCode = 404;
-            res.end('Cannot load the database\n');
-          });
-      }
+      countStudents(fileName)
+        .then((output) => {
+          res.write('This is the list of our students\n');
+          res.end(output); // end with the formatted output without extra newline
+        })
+        .catch(() => {
+          res.statusCode = 404;
+          res.end('Cannot load the database');
+        });
     } else {
       res.statusCode = 404;
-      res.end('Not Found\n');
+      res.end('Not Found');
     }
   } else {
     res.statusCode = 405;
-    res.end('Method Not Allowed\n');
+    res.end('Method Not Allowed');
   }
 });
 
 // Listen on port 1245
-app.listen(1245);
+app.listen(1245, '127.0.0.1', () => {
+});
 
 module.exports = app;
